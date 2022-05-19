@@ -20,6 +20,7 @@ async function run(){
     try{
       await client.connect();
       const inventoryCollection = client.db('wareHouseManagement').collection('inventoryItem');
+      const managementCollection = client.db('wareHouseManagement').collection('manageMent');
      
 
       app.get('/inventoryItem', async (req, res) => {
@@ -34,6 +35,12 @@ async function run(){
         const inventories = await cursor.toArray();
         res.send(inventories);
       })
+      app.get('/manageMent', async (req, res) => {
+        const query = {};
+        const cursor = managementCollection.find(query);
+        const managementQuit = await cursor.toArray();
+        res.send(managementQuit);
+      })
 
       app.get('/inventoryItem/:id', async(req , res) =>{
         const id = req.params.id;
@@ -41,6 +48,13 @@ async function run(){
         const inventoryItem = await inventoryCollection.findOne(query);
         res.send(inventoryItem);
       })
+
+      // POST
+      app.post('/inventoryItems', async(req, res) =>{
+        const newInventory = req.body;
+        const result = await inventoryCollection.insertOne(newInventory);
+        res.send(result);
+    });
 
     //   app.post('/inventoryItem', async (req, res) => {
     //     const newService = req.body;
@@ -87,13 +101,13 @@ async function run(){
 
     //delete
 
-    app.delete("/inventoryItem/:id" , async (req , res) => {
+    app.delete('/inventoryItems/:id', async(req, res) =>{
       const id = req.params.id;
-      const filter = {_id: Object(id)};
-      const result = await inventoryCollection.deleteOne(filter)
-      res.send(result)
-     
-    });
+      const query = {_id: ObjectId(id)};
+      const result = await inventoryCollection.deleteOne(query);
+      res.send(result);
+  });
+
     
 
     }
