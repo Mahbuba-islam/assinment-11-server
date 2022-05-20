@@ -31,6 +31,14 @@ async function run(){
         const inventories = await cursor.toArray();
         res.send(inventories);
       })
+
+      app.get('/inventoryItem/:id', async(req , res) =>{
+        const id = req.params.id;
+        const query = {_id: ObjectId(id)};
+        const inventoryItem = await inventoryCollection.findOne(query);
+        res.send(inventoryItem);
+      })
+
       app.get('/inventoryItems', async (req, res) => {
         const query = {};
         const cursor = inventoryCollection.find(query);
@@ -44,6 +52,7 @@ async function run(){
         const managementQuit = await cursor.toArray();
         res.send(managementQuit);
       })
+      
       app.get('/myItems', async (req, res) => {
         const query = {};
         const cursor = myItemsIinventoryCollection.find(query);
@@ -51,13 +60,7 @@ async function run(){
         res.send(myItemsInventory);
       })
 
-      app.get('/inventoryItem/:id', async(req , res) =>{
-        const id = req.params.id;
-        const query = {_id: ObjectId(id)};
-        const inventoryItem = await inventoryCollection.findOne(query);
-        res.send(inventoryItem);
-      })
-
+     
       // POST
       app.post('/myItems', async(req, res) =>{
         const myNewInventory = req.body;
@@ -72,7 +75,7 @@ async function run(){
     });
 
    
-
+          //quantity added
     app.put('/inventoryItem/:id', async(req, res) =>{
       const id = req.params.id;
       const inventory = req.body
@@ -81,44 +84,44 @@ async function run(){
       const options = {upsert:true};
       
       const updateDoc = {
-        $set: {
-          quantity: inventory.quantity
-        }
-        
-       };
+        $set: 
+          {quantity: updateQuantity},
+        };
+          
+       
       
       const result = await inventoryCollection.updateOne(filter , updateDoc, options);
       res.send(result);
   });
 
-
+        //quantity decrease
       app.put('/inventoryItem/:id', async(req, res) =>{
         const id = req.params.id;
         const inventory = req.body
         console.log('from update api',inventory)
         const filter = {_id : ObjectId(id)}
         const options = {upsert:true};
-        
+      
         const updateDoc = {
-          $set: {
-            quantity: inventory.quantity
-          }
-          
-         };
+          $set: {quantity: updatedQuantity},
+        };
         
-        const result = await inventoryCollection.updateOne(filter , updateDoc, options);
+        
+       const result = await inventoryCollection.updateOne(filter , updateDoc, options);
         res.send(result);
     });
 
-    //delete
-
+    
+         //delete manageInventoryItems 
     app.delete('/inventoryItems/:id', async(req, res) =>{
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = await inventoryCollection.deleteOne(query);
       res.send(result);
   });
-    app.delete('/inventoryItems/:id', async(req, res) =>{
+     
+       //delete myItems 
+  app.delete('/myItems/:id', async(req, res) =>{
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = await myItemsIinventoryCollection.deleteOne(query);
