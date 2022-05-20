@@ -20,6 +20,8 @@ async function run(){
     try{
       await client.connect();
       const inventoryCollection = client.db('wareHouseManagement').collection('inventoryItem');
+      const myItemsIinventoryCollection = client.db('wareHouseManagement').collection('myItems');
+     
       const managementCollection = client.db('wareHouseManagement').collection('manageMent');
      
 
@@ -35,11 +37,18 @@ async function run(){
         const inventories = await cursor.toArray();
         res.send(inventories);
       })
+      
       app.get('/manageMent', async (req, res) => {
         const query = {};
         const cursor = managementCollection.find(query);
         const managementQuit = await cursor.toArray();
         res.send(managementQuit);
+      })
+      app.get('/myItems', async (req, res) => {
+        const query = {};
+        const cursor = myItemsIinventoryCollection.find(query);
+        const myItemsInventory = await cursor.toArray();
+        res.send(myItemsInventory);
       })
 
       app.get('/inventoryItem/:id', async(req , res) =>{
@@ -50,17 +59,19 @@ async function run(){
       })
 
       // POST
+      app.post('/myItems', async(req, res) =>{
+        const myNewInventory = req.body;
+        const result = await myItemsIinventoryCollection.insertOne(myNewInventory );
+        res.send(result);
+    });
+      // POST
       app.post('/inventoryItems', async(req, res) =>{
         const newInventory = req.body;
         const result = await inventoryCollection.insertOne(newInventory);
         res.send(result);
     });
 
-    //   app.post('/inventoryItem', async (req, res) => {
-    //     const newService = req.body;
-    //     const result = await inventoryCollection.insertOne(newService);
-    //     res.send(result);
-    // });
+   
 
     app.put('/inventoryItem/:id', async(req, res) =>{
       const id = req.params.id;
@@ -105,6 +116,12 @@ async function run(){
       const id = req.params.id;
       const query = {_id: ObjectId(id)};
       const result = await inventoryCollection.deleteOne(query);
+      res.send(result);
+  });
+    app.delete('/inventoryItems/:id', async(req, res) =>{
+      const id = req.params.id;
+      const query = {_id: ObjectId(id)};
+      const result = await myItemsIinventoryCollection.deleteOne(query);
       res.send(result);
   });
 
