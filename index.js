@@ -34,6 +34,10 @@ async function run(){
         });
         res.send({ accessToken });
     })
+
+
+    
+
      
         //get inventory product
       app.get('/inventoryItem', async (req, res) => {
@@ -50,6 +54,14 @@ async function run(){
         res.send(inventoryItem);
       })
            //get inventory all product
+      app.get('/inventoryItems', async (req, res) => {
+        const query = {};
+        const cursor = inventoryCollection.find(query);
+        const inventories = await cursor.toArray();
+        res.send(inventories);
+      })
+          
+        //  myItems
       app.get('/inventoryItems', async (req, res) => {
         const query = {};
         const cursor = inventoryCollection.find(query);
@@ -123,38 +135,52 @@ async function run(){
     });
 
    
-          //quantity reStock
-          app.put('/inventoryItem/:id', async(req, res) =>{
-            // const id = req.params.id;
-            const newProduct = req.body
-            // const filter = {_id : ObjectId(id)}
-          //   const options = {upsert:true};
+        //   //quantity reStock
+        //   app.put('/inventoryItem/:id', async(req, res) =>{
+        //     // const id = req.params.id;
+        //     const newProduct = req.body
+        //     // const filter = {_id : ObjectId(id)}
+        //   //   const options = {upsert:true};
           
-          //   const updateDoc = {
-          //     $set: newProduct
-          //   };
+        //   //   const updateDoc = {
+        //   //     $set: newProduct
+        //   //   };
             
             
-           const result = await inventoryCollection.insertOne(newProduct);
-            res.send(result);
-        });
+        //    const result = await inventoryCollection.insertOne(newProduct);
+        //     res.send(result); nkkmj                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
+        // });
 
 
-        //quantity decrease
+        // quantity inecrease
       app.put('/inventoryItem/:id', async(req, res) =>{
         const id = req.params.id;
         const updatedProduct = req.body
+        const {updateQuantity} = updatedProduct
+        console.log(updatedProduct)
+      
+        
        const filter = {_id : ObjectId(id)}
         const options = {upsert:true};
       
         const updateDoc = {
-          $set: updatedProduct
+          $set: updatedProduct 
+
         };
         
         
        const result = await inventoryCollection.updateOne(filter , updateDoc, options);
         res.send(result);
     });
+
+    // app.post('/inventoryItem/:id',(req, res) =>{
+    //    const updateQuantity = req.body
+    //    newQuantity = newQuantity.length + updateQuantity
+    //    newQuantity.push(updatedQuantity)
+    //    req.send(updateQuantity)
+       
+    // })
+
 
     
          //delete manageInventoryItems 
@@ -193,17 +219,17 @@ app.listen(port , () =>{
 })
 
   //  verify token
-function verifyToken(token){
-  let email;
-  jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
-    if(err){
-      email='invalid email'
-    }
-    if(decoded){
-      console.log(decoded)
-      email = decoded
-    }
-  })
-  return email;
-  };
+// function verifyToken(token){
+//   let email;
+//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
+//     if(err){
+//       email='invalid email'
+//     }
+//     if(decoded){
+//       console.log(decoded)
+//       email = decoded
+//     }
+//   })
+//   return email;
+//   };
 
