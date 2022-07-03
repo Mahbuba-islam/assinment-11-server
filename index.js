@@ -26,24 +26,12 @@ async function run(){
      
       const managementCollection = client.db('wareHouseManagement').collection('manageMent');
 
-      //login auth
-      app.post('/login', async (req, res) => {
-        const user = req.body;
-        const accessToken = jwt.sign(user, process.env.ACCESS_TOKEN_SECRET, {
-            expiresIn: '1d'
-        });
-        res.send({ accessToken });
-    })
-
-
-    
-
      
-        //get inventory product
+       //get inventory product
       app.get('/inventoryItem', async (req, res) => {
         const query = {};
-        const cursor = inventoryCollection.find(query).limit(6);
-        const inventories = await cursor.toArray();
+        const cursor = inventoryCollection.find(query);
+        const inventories = await cursor.limit(6).toArray();
         res.send(inventories);
       })
             //get inventory product details by id
@@ -53,106 +41,77 @@ async function run(){
         const inventoryItem = await inventoryCollection.findOne(query);
         res.send(inventoryItem);
       })
-           //get inventory all product
+
+
+         //get management data
+         app.get('/manageMent', async (req, res) => {
+          const query = {};
+          const cursor = managementCollection.find(query);
+          const managementQuit = await cursor.toArray();
+          res.send(managementQuit);
+        }); 
+
+
+
+ 
+     //get inventory all product
       app.get('/inventoryItems', async (req, res) => {
+        console.log('query', req.query)
+        const page = parseInt(req.query.page);
+        const size = parseInt(req.query.size)
         const query = {};
-        const cursor = inventoryCollection.find(query);
-        const inventories = await cursor.toArray();
-        res.send(inventories);
-      })
-          
-        //  myItems
-      app.get('/inventoryItems', async (req, res) => {
-        const query = {};
-        const cursor = inventoryCollection.find(query);
-        const inventories = await cursor.toArray();
-        res.send(inventories);
-      })
-       
-           //get management data
-      app.get('/manageMent', async (req, res) => {
-        const query = {};
-        const cursor = managementCollection.find(query);
-        const managementQuit = await cursor.toArray();
-        res.send(managementQuit);
-      })
-
-      //new myItems load api
-      app.post("/uploadItem", async (req,res) =>{
-        const product = req.body;
-        const tokenInfo = req.headers.authorization;
-        const [email, accessToken] = tokenInfo.split(' ')
-
-        const decoded = verifyToken(accessToken)
-
-        if(email === decoded.email){
-          const result = await myItemsCollection .insertOne(product);
-          res.send({success: 'product upload successfully', result})
+        const cursor = inventoryCollection.find(query)
+        let inventories
+        if(page || size){
+          inventories = await cursor.skip(page*size).limit(size).toArray()
         }
         else{
-          res.send ({success: 'unthorized access'}) 
+          inventories = await cursor.toArray()
         }
-      })
-
-      
-      app.get("/addItem", async(req,res) => {
-          const listInfo = req.body;
-          const result = await myItemsCollection.insertOne(listInfo);
-          res.send({success: 'items added complete', result})
-        })
-
-
-        app.get("/uploadList", async (req,res) =>{
-          const tokenInfo = req.headers.authorization;
-          const [email, accessToken] = tokenInfo.split(' ')
-          const decoded = verifyToken(accessToken)
-         if(email === decoded.email){
-            const items = await myItemsCollection.find({email:email}).toArray();
-            res.send(items)
-          }
-          else{
-            res.send ({success: 'unthorized access'}) 
-          }
-        })
         
-
+        res.send(inventories);
+      })
+           
+    //  myItems
+ app.get('/myItems', async (req, res) => {
+  const email = req.query.email;
+  console.log(email)
+    const query = {email:email};
+   
+       const cursor = inventoryCollection.find(query);
+       const myItems = await cursor.toArray();
+       res.send(myItems);
+   })
       
-          
+
+  
       
      
-        // POST for add myItems
-      //   app.post('/myItems', async (req, res) => {
-      //     const myItem = req.body;
-      //     const result = await myItemsCollection.insertOne(myItem);
-      //     res.send(result);
+      
+      // app.get("/addItem", async(req,res) => {
+      //   const listInfo = req.body;
+      //   const result = await myItemsCollection.insertOne(listInfo);
+      //   res.send({success: 'items added complete', result})
       // })
+        
+       // POST for add new inventory in myItems 
+    //    app.post('/inventoryItems', async(req, res) =>{
+    //     const products = req.body;
+    //     const result = await myItemsCollection.insertOne(products);
+    //     res.send(result);
+    // });
 
-        // POST for add new inventory item
-      app.post('/inventoryItems', async(req, res) =>{
-        const newInventory = req.body;
-        const result = await inventoryCollection.insertOne(newInventory);
+ 
+
+       
+       // POST for add new inventory item
+       app.post('/inventoryItems', async(req, res) =>{
+        const products = req.body;
+        const result = await inventoryCollection.insertOne(products);
         res.send(result);
     });
-
-   
-        //   //quantity reStock
-        //   app.put('/inventoryItem/:id', async(req, res) =>{
-        //     // const id = req.params.id;
-        //     const newProduct = req.body
-        //     // const filter = {_id : ObjectId(id)}
-        //   //   const options = {upsert:true};
-          
-        //   //   const updateDoc = {
-        //   //     $set: newProduct
-        //   //   };
-            
-            
-        //    const result = await inventoryCollection.insertOne(newProduct);
-        //     res.send(result); nkkmj                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                         
-        // });
-
-
-        // quantity inecrease
+  
+            // quantity inecrease
       app.put('/inventoryItem/:id', async(req, res) =>{
         const id = req.params.id;
         const updatedProduct = req.body
@@ -173,34 +132,31 @@ async function run(){
         res.send(result);
     });
 
-    // app.post('/inventoryItem/:id',(req, res) =>{
-    //    const updateQuantity = req.body
-    //    newQuantity = newQuantity.length + updateQuantity
-    //    newQuantity.push(updatedQuantity)
-    //    req.send(updateQuantity)
-       
-    // })
-
 
     
          //delete manageInventoryItems 
-    app.delete('/inventoryItems/:id', async(req, res) =>{
-      const id = req.params.id;
-      const query = {_id: ObjectId(id)};
-      const result = await inventoryCollection.deleteOne(query);
-      res.send(result);
-  });
-     
-       //delete myItems 
-  app.delete('/myItems/:id', async(req, res) =>{
-      const id = req.params.id;
-      const query = {_id: ObjectId(id)};
-      const result = await myItemsIinventoryCollection.deleteOne(query);
-      res.send(result);
-  });
+         app.delete('/inventoryItems/:id', async(req, res) =>{
+          const id = req.params.id;
+          const query = {_id: ObjectId(id)};
+          const result = await inventoryCollection.deleteOne(query);
+          res.send(result);
+      });
+         
+           //delete myItems 
+      app.delete('/myItems/:id', async(req, res) =>{
+       const id = req.params.id;
+        const query = {_id: ObjectId(id)};
+          const result = await inventoryCollection.deleteOne(query);
+          res.send(result);
+      });
+      
 
-    
-
+      app.get('/productCount', async(req,res)=>{
+        const query = {}
+        const cursor = inventoryCollection.find(query)
+        const count = await cursor.count()
+        res.send({count})
+      })
     }
     finally{
 
@@ -218,18 +174,4 @@ app.listen(port , () =>{
     console.log('listening to port')
 })
 
-  //  verify token
-// function verifyToken(token){
-//   let email;
-//   jwt.verify(token, process.env.ACCESS_TOKEN_SECRET, function(err, decoded){
-//     if(err){
-//       email='invalid email'
-//     }
-//     if(decoded){
-//       console.log(decoded)
-//       email = decoded
-//     }
-//   })
-//   return email;
-//   };
-
+ 
