@@ -179,8 +179,8 @@ async function run(){
 run().catch(console.dir);
 
 
-app.get('/heroin', (req, res) => {
-  res.send('heroin added');
+app.get('/hero', (req, res) => {
+  res.send('heroku added');
 });
 
 app.get('/', (req, res) => {
