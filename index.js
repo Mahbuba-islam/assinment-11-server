@@ -179,6 +179,9 @@ async function run(){
 run().catch(console.dir);
 
 
+app.get('/hero', (req, res) => {
+  res.send('herokuuu added');
+});
 
 app.get('/', (req, res) => {
     res.send('Running server warehouse');
